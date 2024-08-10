@@ -11,9 +11,16 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma, Owner as PrismaOwner } from "@prisma/client";
+import { LocalStorageService } from "src/storage/providers/local/local.storage.service";
+import { InputJsonValue } from "src/types";
+import { FileDownload, FileUpload } from "src/storage/base/storage.types";
+import { LocalStorageFile } from "src/storage/providers/local/local.storage.types";
 
 export class OwnerServiceBase {
-  constructor(protected readonly prisma: PrismaService) {}
+  constructor(
+    protected readonly prisma: PrismaService,
+    protected readonly localStorageService: LocalStorageService
+  ) {}
 
   async count(args: Omit<Prisma.OwnerCountArgs, "select">): Promise<number> {
     return this.prisma.owner.count(args);
@@ -33,5 +40,61 @@ export class OwnerServiceBase {
   }
   async deleteOwner(args: Prisma.OwnerDeleteArgs): Promise<PrismaOwner> {
     return this.prisma.owner.delete(args);
+  }
+
+  async uploadProfilePhoto<T extends Prisma.OwnerFindUniqueArgs>(
+    args: Prisma.SelectSubset<T, Prisma.OwnerFindUniqueArgs>,
+    file: FileUpload
+  ): Promise<PrismaOwner> {
+    file.filename = `profilePicture-${args.where.id}.${file.filename
+      .split(".")
+      .pop()}`;
+    const containerPath = "profilePhoto";
+    const profilePhoto = await this.localStorageService.uploadFile(
+      file,
+      [],
+      1000000,
+      containerPath
+    );
+
+    return await this.prisma.owner.update({
+      where: args.where,
+
+      data: {
+        profilePhoto: profilePhoto as InputJsonValue,
+      },
+    });
+  }
+
+  async downloadProfilePhoto<T extends Prisma.OwnerFindUniqueArgs>(
+    args: Prisma.SelectSubset<T, Prisma.OwnerFindUniqueArgs>
+  ): Promise<FileDownload> {
+    const { profilePhoto } = await this.prisma.owner.findUniqueOrThrow({
+      where: args.where,
+    });
+
+    return await this.localStorageService.downloadFile(
+      profilePhoto as unknown as LocalStorageFile
+    );
+  }
+
+  async deleteProfilePhoto<T extends Prisma.OwnerFindUniqueArgs>(
+    args: Prisma.SelectSubset<T, Prisma.OwnerFindUniqueArgs>
+  ): Promise<PrismaOwner> {
+    const { profilePhoto } = await this.prisma.owner.findUniqueOrThrow({
+      where: args.where,
+    });
+
+    await this.localStorageService.deleteFile(
+      profilePhoto as unknown as LocalStorageFile
+    );
+
+    return await this.prisma.owner.update({
+      where: args.where,
+
+      data: {
+        profilePhoto: Prisma.DbNull,
+      },
+    });
   }
 }

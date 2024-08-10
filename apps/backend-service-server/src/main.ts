@@ -9,6 +9,7 @@ import {
   swaggerDocumentOptions,
   swaggerSetupOptions,
 } from "./swagger";
+import { graphqlUploadExpress } from "graphql-upload";
 
 import { Logger } from "nestjs-pino";
 
@@ -21,6 +22,11 @@ async function main() {
   });
 
   app.useLogger(app.get(Logger));
+
+  app.use(
+    "/graphql",
+    graphqlUploadExpress({ maxFileSize: 50000000, maxFiles: 10 })
+  );
 
   app.setGlobalPrefix("api");
   app.useGlobalPipes(

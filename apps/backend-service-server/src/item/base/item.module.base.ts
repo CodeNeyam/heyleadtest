@@ -11,8 +11,9 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { Module } from "@nestjs/common";
 import { ACLModule } from "../../auth/acl.module";
+import { StorageModule } from "src/storage/storage.module";
 @Module({
-  imports: [ACLModule],
-  exports: [ACLModule],
+  imports: [StorageModule, ACLModule],
+  exports: [StorageModule, ACLModule],
 })
 export class ItemModuleBase {}

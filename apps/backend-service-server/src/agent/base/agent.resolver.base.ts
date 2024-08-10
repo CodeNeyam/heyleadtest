@@ -17,6 +17,8 @@ import * as nestAccessControl from "nest-access-control";
 import * as gqlACGuard from "../../auth/gqlAC.guard";
 import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
 import * as common from "@nestjs/common";
+import { GraphQLUpload } from "graphql-upload";
+import { FileUpload } from "src/storage/base/storage.types";
 import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Agent } from "./Agent";
@@ -136,5 +138,26 @@ export class AgentResolverBase {
       }
       throw error;
     }
+  }
+
+  @graphql.Mutation(() => Agent)
+  async uploadImage(
+    @graphql.Args({
+      name: "file",
+      type: () => GraphQLUpload,
+    })
+    file: FileUpload,
+    @graphql.Args()
+    args: AgentFindUniqueArgs
+  ): Promise<Agent> {
+    return await this.service.uploadImage(args, file);
+  }
+
+  @graphql.Mutation(() => Agent)
+  async deleteImage(
+    @graphql.Args()
+    args: AgentFindUniqueArgs
+  ): Promise<Agent> {
+    return await this.service.deleteImage(args);
   }
 }
