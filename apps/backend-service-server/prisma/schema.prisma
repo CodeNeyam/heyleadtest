@@ -1,0 +1,106 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Owner {
+  address      String?
+  cnss         String?
+  companyName  String?
+  createdAt    DateTime @default(now())
+  email        String?
+  fullName     String?
+  ice          String?
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  ifField      String?
+  password     String?
+  phone        String?
+  profilePhoto Json?
+  rc           String?
+  rib          String?
+  tp           String?
+  updatedAt    DateTime @updatedAt
+}
+
+model Partner {
+  createdAt   DateTime @default(now())
+  email       String?
+  fullName    String?
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  password    String?
+  phoneNumber String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Lead {
+  clientAddress  String?
+  clientCity     String?
+  clientFullName String?
+  clientPhone    String?
+  createdAt      DateTime  @default(now())
+  date           DateTime?
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  item           String?
+  price          Float?
+  quantity       Int?
+  serviceType    String?
+  status         String?
+  updatedAt      DateTime  @updatedAt
+}
+
+model Agent {
+  createdAt DateTime @default(now())
+  email     String?
+  fullName  String?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  image     Json?
+  password  String?
+  phone     String?
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  createdAt   DateTime @default(now())
+  currency    String?
+  description String?
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  image       Json?
+  name        String?
+  note        String?
+  price       Float?
+  serviceType String?
+  updatedAt   DateTime @updatedAt
+  videoLink   String?
+  webLink     String?
+}
+
+model BillingPlan {
+  createdAt DateTime                 @default(now())
+  id        String                   @id @default(auto()) @map("_id") @db.ObjectId
+  onHold    Float?
+  planFees  Float?
+  planType  EnumBillingPlanPlanType?
+  updatedAt DateTime                 @updatedAt
+  users     Int?
+  withdraw  Float?
+}
+
+model User {
+  createdAt DateTime @default(now())
+  email     String?  @unique
+  firstName String?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+enum EnumBillingPlanPlanType {
+  Option1
+}
