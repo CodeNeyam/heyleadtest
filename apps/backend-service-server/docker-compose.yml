@@ -13,7 +13,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       SERVICE_NAME: ${SERVICE_NAME}
     depends_on:
-      - migrate
+      - redis
     restart: on-failure
   migrate:
     build:
@@ -58,6 +58,15 @@ services:
       - openssl rand -base64 741 > /data/cert.crt; chmod 400 /data/cert.crt &&
         chown 999 /data/cert.crt; /usr/local/bin/docker-entrypoint.sh mongod
         --bind_ip_all --keyFile /data/cert.crt --replSet rs0
+  redis:
+    container_name: ${REDIS_HOST}
+    image: redis:7
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - redis:/data
 volumes:
   postgres: ~
   mongo: ~
+  redis:
+    driver: local
